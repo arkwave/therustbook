@@ -64,4 +64,23 @@
 ### 4.2: References and Borrowing
 - A reference is like a pointer in that it’s an address we can follow to access the data stored at that address; that data is owned by some other variable. Unlike a pointer, a reference is guaranteed to point to a valid value of a particular type for the life of that reference.
 
+- We can have two kinds of references:
+    - Many _immutable_ references;
+    - One _mutable_ reference.
+
+- These reference types are mutually exclusive; we cannot have mutable and immutable references to the same data co-exist; the immutable references don't expect the value of the underlying to change, while the mutable reference can do exactly that. 
+
+- We also cannot have dangling references, i.e. references to variables that fall out of scope; all references must be **valid**.
+
+
+### 4.3: The `slice` type. 
+- slices are _references to collections of objects_; for example, given a string `let s = String::from("hello world")`, we can construct references to sub-parts of the string as follows:
+    ```
+    let hello = &s[0..5];
+    let world = &s[6..11];
+
+    ```
+
+
+
 
