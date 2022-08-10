@@ -80,7 +80,27 @@
     let world = &s[6..11];
 
     ```
+- all string literals are de-factor slices; this is because string literals are stack-allocated and so of a fixed size, i.e. a string literal is just a slice pointing to a set of addresses in memory.
+- `&String -> &str` equivalence uses something called _implicit deref coercion_, god knows what the hell that means.
 
 
+### 5.1 Defining and Instantiating Structs. 
+
+- Structs are basically like FastAPI models - are named sets of key-value pairs that can be instantiated. They are used to group together items of data that make sense together.  
+- Like other types, passing a struct into a functiong gives that function ownership over the struct - can give a reference if we do not want this. 
+- Structs are either wholly mutable or wholly immutable; cannot make certain fields within a struct mutable. The mutability is derived from the variable assignment, e.g.:
+
+    ```
+    struct A {foo: i32, bar: i32}; 
+    let a1 = A {foo: 5, bar: 6); // <- this struct is immutable, since a1 is immutable. 
+
+    let mut a2 = A {foo: 7, bar: 10} // <- this struct is mutable, since a2 is mutable. 
+
+    ```
+- Perfectly legal to define structs with no fields. 
+- **General Principle**: we want a struct to **OWN** all of its data as far as possible - possible to instantiate fields as references, but this requires specifiying _lifetimes_.  
+- Useful syntax:
+    - `dbg!()` macro - takes ownership of an expression, prints file and line number, and then returns ownership. 
+    - can specify `#[derive(Debug)]` on a struct to use println! statements - this implements the Debug trait on the struct defined. 
 
 

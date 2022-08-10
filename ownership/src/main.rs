@@ -1,24 +1,23 @@
 fn main() {
-    let mut s = String::from("hello");
-    change(&mut s);
-    
-    let r1 = &s; 
-    let r2 = &s;
-    println!("{}, {}", r1, r2);  
 
-    let r3 = &mut s;
-    r3.push_str("...again?");
+    // just a few examples of string slices in action. 
+    // notice how first_word takes &s as argument instead of &String; this is because all
+    // string literals are slices, which is why they are immutable to begin with. 
+    let s = String::from("hello world");
+    let word = first_word(&s[0..5]);
+    let word2 = first_word(&s[..]);
+    let word3 = first_word(&s);
 
-    //println!("{}", r1); <- this will break, since the reference is being used after mutable
-    //borrow. 
-
-    println!("{}", s);
-    
-    // println!("{}", r1); <- this will break, since r1 and r2 are out of scope after the mutable
-    // borrow. 
-
+    assert_eq!(word, word3);
+    assert_eq!(word, word2);
 }
 
-fn change(string: &mut String) {
-    string.push_str(", world!")
+fn first_word(s: &str) -> &str {
+    let bytes = s.as_bytes();
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+    &s[..]
 }
