@@ -103,4 +103,10 @@
     - `dbg!()` macro - takes ownership of an expression, prints file and line number, and then returns ownership. 
     - can specify `#[derive(Debug)]` on a struct to use println! statements - this implements the Debug trait on the struct defined. 
 
+- Structs can have two kinds of methods: 
+    - instance methods. these take some variant of `self, &self, &mut self` as arguments. Called by `instance.method()`.  
+    - classmethods, which do not. Called by `Struct::method`.
+
+
+### Enums & Pattern Matching 
 
