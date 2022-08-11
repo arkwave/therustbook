@@ -109,4 +109,9 @@
 
 
 ### Enums & Pattern Matching 
+- Can use enums to define multiple variants of the same underlying `Type` quickly. 
+- Each variant can have its own constructors/data types as input. 
+- Can instantiate a variant by going `enum::variant(variant_data_input)`
+- Can define methods on enums as well, which will then be accessible by every variant of the enum. 
+
 
