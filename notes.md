@@ -120,4 +120,14 @@
 - Can use match statements to enumerate and handle all variants within an enum.
     - matches are _exhaustive_; every case needs to be handled. 
     - cases that don't need to be explicitly handled can be put under the "other" key, and cases to be ignored can be handled with `_ => handling_func()`
-- if using a match is too verbose, can we instead use `if let` and `else` as syntactic sugar to achieve the same effect. 
+- if using a match is too verbose, can we instead use `if let` and `else` as syntactic sugar to achieve the same effect.
+
+
+### 8: Common data structures/collections. 
+
+- Strings: 
+    - more complex in Rust than in other languages; cannot use integer slicing due to how Rust store strings in memory.
+        > dependent on encoding; anything non-ASCII requires > 1 byte to encode for each char, so calling str[i] will not return the i-th character like we expect. 
+        > generalizing across all byte requirements is tedious. 
+        > solution: use iterators over characters in a string (e.g. `for c in "hello".chars()`) or bytes (e.g. for b in "hello".bytes()). 
+    - to re-iterate: `&str` is a stack-allocated immutable reference to string literal of fixed size, `String` is a heap-allocated variable-length `String` object. 
