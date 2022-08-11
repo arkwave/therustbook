@@ -108,10 +108,16 @@
     - classmethods, which do not. Called by `Struct::method`.
 
 
-### Enums & Pattern Matching 
+### 6.1 Enums & Pattern Matching 
 - Can use enums to define multiple variants of the same underlying `Type` quickly. 
 - Each variant can have its own constructors/data types as input. 
 - Can instantiate a variant by going `enum::variant(variant_data_input)`
 - Can define methods on enums as well, which will then be accessible by every variant of the enum. 
-
-
+- **Special**: The Option Enum
+    - Rust has _no null values_; values that could potentially be `Null` are cast to an `Option<T>` type, where the type `Option` is generic over the type of the contained value `T`.  
+    - The `Option` enum in turn has two variants: `Some` (which handles non-null cases) and `None`, which handles the null case. 
+    - All operations that use the `Option` type must explicitly handle both `Some` and `None` cases; `Some` variants have access to the `T` contained within.
+- Can use match statements to enumerate and handle all variants within an enum.
+    - matches are _exhaustive_; every case needs to be handled. 
+    - cases that don't need to be explicitly handled can be put under the "other" key, and cases to be ignored can be handled with `_ => handling_func()`
+- if using a match is too verbose, can we instead use `if let` and `else` as syntactic sugar to achieve the same effect. 
