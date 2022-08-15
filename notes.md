@@ -130,4 +130,23 @@
         > dependent on encoding; anything non-ASCII requires > 1 byte to encode for each char, so calling str[i] will not return the i-th character like we expect. 
         > generalizing across all byte requirements is tedious. 
         > solution: use iterators over characters in a string (e.g. `for c in "hello".chars()`) or bytes (e.g. for b in "hello".bytes()). 
-    - to re-iterate: `&str` is a stack-allocated immutable reference to string literal of fixed size, `String` is a heap-allocated variable-length `String` object. 
+    - to re-iterate: `&str` is a stack-allocated immutable reference to string literal of fixed size, `String` is a heap-allocated variable-length `String` object.
+
+- Vectors:
+    - heap-allocated, variable size; initialized with `vec![1, 2, 3]` etc. 
+    - indexed with integers; for instance, given a vector `v`, can runs omething like `first_elem = &v[0]`. Note that we are indexing a reference to the vector. 
+    - vectors also implement the `.get` method; i.e. `let first_elem = v.get(0)`; the get method handles the reference automatically. `.get` also returns None for entries
+    outside the range of the vector automatically.
+    - `.push` method appends to the vector. 
+    - same rules regarding mutable and immutable references apply; cannot do something like:
+        ```
+        let first = &v[0]
+        v.push(6);
+        ```
+    - In this case, `first` holds an immutable reference to the first element of the array; however, `push` requires a mutable reference to the array to actually
+    insert the element - therefore the compiler will throw an error. 
+    - can iterate over the values in a vector using the conventional `for i in (mut) &v` type syntax, depending on whether or not we want mutable or immutable references 
+      to the contained elements. Note that if we're using a mutable reference to the contents of a vector, we need to _dereference_ the element when making changes to it. 
+    - vectors can only store data of the same type; can extend flexibility by using enums (remember that all variants of an enum are the same type). 
+
+
