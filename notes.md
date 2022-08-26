@@ -149,4 +149,8 @@
       to the contained elements. Note that if we're using a mutable reference to the contents of a vector, we need to _dereference_ the element when making changes to it. 
     - vectors can only store data of the same type; can extend flexibility by using enums (remember that all variants of an enum are the same type). 
 
+### 9: Error Handling with Panic (unrecoverable) and Result (recoverable)
+- `panic!` macro can be used to raise the equivalent of RuntimeErrors; indicates that the error has put the program into an unrecoverable state of some sort. 
+- 
+
 
