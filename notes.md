@@ -116,7 +116,7 @@
 - **Special**: The Option Enum
     - Rust has _no null values_; values that could potentially be `Null` are cast to an `Option<T>` type, where the type `Option` is generic over the type of the contained value `T`.  
     - The `Option` enum in turn has two variants: `Some` (which handles non-null cases) and `None`, which handles the null case. 
-    - All operations that use the `Option` type must explicitly handle both `Some` and `None` cases; `Some` variants have access to the `T` contained within.
+    - All operations that use the `Option` type must explicitly handle both `Some` and `None` cases; `Some` variants have access to the generic type `T` contained within.
 - Can use match statements to enumerate and handle all variants within an enum.
     - matches are _exhaustive_; every case needs to be handled. 
     - cases that don't need to be explicitly handled can be put under the "other" key, and cases to be ignored can be handled with `_ => handling_func()`
@@ -149,8 +149,48 @@
       to the contained elements. Note that if we're using a mutable reference to the contents of a vector, we need to _dereference_ the element when making changes to it. 
     - vectors can only store data of the same type; can extend flexibility by using enums (remember that all variants of an enum are the same type). 
 
-### 9: Error Handling with Panic (unrecoverable) and Result (recoverable)
+### 9: Error Handling with Panic (unrecoverable)
 - `panic!` macro can be used to raise the equivalent of RuntimeErrors; indicates that the error has put the program into an unrecoverable state of some sort. 
-- 
+- can set the `RUST_BACKTRACE=1` environment variable to output the entire stack trace of a given error. 
 
+### 9.2: Handling recoverable errors with `Result<T, E>`
+- By default, many Rust functions return a `Result` object; this object is an enum with two variants, `Ok` and `Err`. The types of `Ok` and `Err` are inferred from the operation 
+that is being handled; for example in the following snippet:
+
+```
+use std::fs::File; 
+fn main() {
+    let greeting_file_result = File::open("hello.txt")
+}
+```
+the `File::open("hello.txt")` method returns a `Result<std::fs::File, std::io::Error>`. All variants of a `Result` must be explicitly handled, either by using `match` or by using closures (later chapter). Example of a closure is as follows:
+
+```
+use std::fs::File;
+use std::io::ErrorKind;
+
+fn main() {
+    let greeting_file = File::open("hello.txt").unwrap_or_else(|error| {
+        if error.kind() == ErrorKind::NotFound {
+            File::create("hello.txt").unwrap_or_else(|error| {
+                panic!("Problem creating the file: {:?}", error); 
+            })
+        } else {
+            panic!("Problem opening the file!: {:?}", error);
+        }
+    });
+}
+```
+This snippet does the following: 1) tries to open the file 2) if an error is thrown, checks the error type 3) if the error type is FileNotFound, it creates the file 4) panic otherwise. 
+
+- Instead of matching, we can use the `unwrap` and `expect` keywords to automatically panic if an error variant is observed. `unwrap` directly returns the `Ok` if found, otherwise
+panics; `expect` displays a user-specified error message if an `Err` is found. 
+
+``` 
+let greeting_file = File::open("hello.txt").unwrap();
+```
+```
+let greeting_file = File::open("hello.txt")
+    .expect("hello.txt should be included in this project");
+```
 
