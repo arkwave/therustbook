@@ -183,8 +183,9 @@ fn main() {
 ```
 This snippet does the following: 1) tries to open the file 2) if an error is thrown, checks the error type 3) if the error type is FileNotFound, it creates the file 4) panic otherwise. 
 
+#### `expect` and `unwrap`
 - Instead of matching, we can use the `unwrap` and `expect` keywords to automatically panic if an error variant is observed. `unwrap` directly returns the `Ok` if found, otherwise
-panics; `expect` displays a user-specified error message if an `Err` is found. 
+panics; `expect` displays a user-specified error message if an `Err` is found. In production, might want to use `expect` to display more information about what went wrong.  
 
 ``` 
 let greeting_file = File::open("hello.txt").unwrap();
@@ -193,4 +194,44 @@ let greeting_file = File::open("hello.txt").unwrap();
 let greeting_file = File::open("hello.txt")
     .expect("hello.txt should be included in this project");
 ```
+
+#### Error Propagation
+- errors can be propagated up using the `?` symbol - refer to `propagation.rs` for examples. 
+- important note about the the `?` operator - it can only be used in functions whose return type is compatible with the value the `?` is used on; `?` represents an early
+return from a function, and so the function has to actually offer that return type for its usage to be valid.
+- the `?` operator can also be used with `Option` enums, example below. In this case, if the next() call returns a None, the function will return that; else, it will continue to
+read the rest of the characters in the line. 
+
+``` 
+fn last_char_of_first_line(text: &str) -> Option<char> {
+    text.lines().next()?.chars().last() 
+}
+```
+- can define custom structs for field validation. For example, the struct below requires the guess be between 1 and 100: 
+```
+#![allow(unused)]
+fn main() {
+    pub struct Guess {
+        value: i32,
+    }
+
+    impl Guess {
+        pub fn new(value: i32) -> Guess {
+            if value < 1 || value > 100 {
+                panic!("Guess value must be between 1 and 100, got {}.", value);
+            }
+
+            Guess { value }
+        }
+
+        pub fn value(&self) -> i32 {
+            self.value
+        }
+    }
+}
+```
+
+### 10: Generics, Traits and Lifetimes
+
+
 
