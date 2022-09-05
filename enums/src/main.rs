@@ -16,7 +16,7 @@ fn value_in_cents(coin: &Coin) -> u8 {
             println!("Found a penny!");
             1
         }
-        Coin::Nickel => 5,
+        Coin::Nickel => "this is an error" ,
         Coin::Dime => 10,
         Coin::Quarter(state) => {
             println!("State quarter from {:?}!", state);

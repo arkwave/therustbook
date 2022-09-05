@@ -232,6 +232,57 @@ fn main() {
 ```
 
 ### 10: Generics, Traits and Lifetimes
+- can define methods (i.e. `impl` blocks), `structs` and `enums` over generic parameters. 
+- the behavior can be further constrained by traits, i.e. types that implement a certain functionality.
+- traits can have default implementations, which can then be over-ridden for each specific struct that trait is defined for. 
+- interestingly, traits can have multiple sub-methods; this makes them more similar to interfaces than properties of an object. 
+- can additionally use **trait bounds** to constrain the types accepted by a function to include only those types that accept a certain trait. example:
+```
+fn main<T: Summary> (item:&T) {
+    //snip
+}
+```
+can use the following syntatic sugar if we don't need to explicitly constrain the type:
+```
+fn main(item: &impl Summary) {
+    //snip 
+}
+```
+- To display multiple trait bounds, we can use the following `where` syntax:
+```
+fn some_function<T, U>(t: &T, u: &U) -> i32
+    where T: Display + Clone,
+          U: Clone + Debug
+{
 
+```
+- trait bounds also allow us to perform blanket implementations, i.e. implement traits for structs that already implement a certain trait. for example,
+rust standard library uses trait bounds to implement a `to_string` method for all types that implement the `Display` trait. 
+- you can also use trait bounds to conditionally implement methods for types that implement certain traits. Example:
 
+```
+use std::fmt::Display;
+
+struct Pair<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Pair<T> {
+    fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
+
+impl<T: Display + PartialOrd> Pair<T> {
+    fn cmp_display(&self) {
+        if self.x >= self.y {
+            println!("The largest member is x = {}", self.x);
+        } else {
+            println!("The largest member is y = {}", self.y);
+        }
+    }
+}
+```
+- in this case, the `cmp_display` method is implemented only for `Pair` structs containing types `T` that implement the `Display` and `PartialOrd` traits. 
 
