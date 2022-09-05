@@ -231,7 +231,7 @@ fn main() {
 }
 ```
 
-### 10: Generics, Traits and Lifetimes
+### 10.1 - 10.2: Generics & Traits
 - can define methods (i.e. `impl` blocks), `structs` and `enums` over generic parameters. 
 - the behavior can be further constrained by traits, i.e. types that implement a certain functionality.
 - traits can have default implementations, which can then be over-ridden for each specific struct that trait is defined for. 
@@ -286,3 +286,4 @@ impl<T: Display + PartialOrd> Pair<T> {
 ```
 - in this case, the `cmp_display` method is implemented only for `Pair` structs containing types `T` that implement the `Display` and `PartialOrd` traits. 
 
+### 10.3: Lifetimes 
