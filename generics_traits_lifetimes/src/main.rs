@@ -1,28 +1,50 @@
-struct Point<X1, Y1> {
-    x: X1,
-    y: Y1,
+// set up basic structs
+pub struct NewsLetter {
+    pub headline: String, 
+    pub location: String, 
+    pub author: String, 
+    pub content: String
 }
 
-// the <X1, Y1> is needed after the impl because we need the compiler to know
-// that X1 and Y1 are the generics over which the Point struct is defined. 
-impl<X1, Y1> Point<X1, Y1> {
-    // same here - we need <X2, Y2> after the function name so that 
-    // the compiler knows that the other parameter is a Point struct generic 
-    // over types X2 and Y2. 
-    fn mixup<X2, Y2>(self, other: Point<X2, Y2>) -> Point<X1, Y2> {
-        Point {
-            x: self.x,
-            y: other.y,
-        }
+pub struct Tweet {
+    pub username: String, 
+    pub content: String, 
+    pub reply: bool, 
+    pub retweet: bool
+}
+
+// start implementing traits for these structs, starting with a default implementation
+pub trait Summary {
+    fn summarize(&self) -> String {
+        format!("Read more from {}...", self.summarize_author())
+    }
+    fn summarize_author(&self) -> String; 
+}
+
+// now add more detail to the trait implementations for each individual struct 
+impl Summary for Tweet {
+    fn summarize_author(&self) -> String {
+        format!("@{}", self.username)
+    }
+}
+
+impl Summary for NewsLetter {
+    fn summarize_author(&self) -> String {
+       format!("distinguised author {}", self.author) 
     }
 }
 
 fn main() {
-    let p1 = Point { x: 5, y: 10.4 };
-    let p2 = Point { x: "Hello", y: 'c' };
-
-    let p3 = p1.mixup(p2);
-
-    println!("p3.x = {}, p3.y = {}", p3.x, p3.y);
+    
+    let tweet = Tweet {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        retweet: false,
+    };
+    println!("1 new tweet: {}", tweet.summarize());
 }
+
 
