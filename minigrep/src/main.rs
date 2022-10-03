@@ -1,15 +1,23 @@
 use std::env;
 use std::fs;
+use std::process;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let query = &args[1];
-    let filepath = &args[2];
-    let contents = fs::read_to_string("poem.txt").expect("should be able to read file...");
+    let config = Config::new(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {}", err);
+        process::exit(1)
+    });
 
-    println!("Searching for {}", query);
-    println!("In {}", filepath);
-    println!("With content:\n {}", contents);
+    println!("Searching for {} in {}", config.query, config.filepath);
+
+    run(config);
+}
+
+fn run(config: Config) {
+    let contents =
+        fs::read_to_string(config.filepath).expect("Something went wrong when reading the file!");
+    println!("Found contents:\n{}", contents)
 }
 
 struct Config {
