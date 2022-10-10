@@ -197,10 +197,13 @@ let greeting_file = File::open("hello.txt")
 
 #### Error Propagation
 - errors can be propagated up using the `?` symbol - refer to `propagation.rs` for examples. 
-- important note about the the `?` operator - it can only be used in functions whose return type is compatible with the value the `?` is used on; `?` represents an early
-return from a function, and so the function has to actually offer that return type for its usage to be valid.
-- the `?` operator can also be used with `Option` enums, example below. In this case, if the next() call returns a None, the function will return that; else, it will continue to
-read the rest of the characters in the line. 
+- important note about the the `?` operator - it can only be used in functions
+  whose return type is compatible with the value the `?` is used on; `?`
+  represents an early return from a function, and so the function has to
+  actually offer that return type for its usage to be valid.
+- the `?` operator can also be used with `Option` enums, example below. In this
+  case, if the next() call returns a None, the function will return that; else,
+  it will continue to read the rest of the characters in the line. 
 
 ``` 
 fn last_char_of_first_line(text: &str) -> Option<char> {
@@ -232,11 +235,27 @@ fn main() {
 ```
 
 ### 10.1 - 10.2: Generics & Traits
-- can define methods (i.e. `impl` blocks), `structs` and `enums` over generic parameters. 
-- the behavior can be further constrained by traits, i.e. types that implement a certain functionality.
-- traits can have default implementations, which can then be over-ridden for each specific struct that trait is defined for. 
-- interestingly, traits can have multiple sub-methods; this makes them more similar to interfaces than properties of an object. 
-- can additionally use **trait bounds** to constrain the types accepted by a function to include only those types that accept a certain trait. example:
+- can define methods (i.e. `impl` blocks), `structs` and `enums` over **generic parameters**.
+    - these generics are often included in the signature of the
+      function/method/enum/struct so that the compiler "knows" that the type is
+      being implemented as generic. 
+    - there is no runtime penalty for generics in Rust - compiler performs
+      **monomorphization**, i.e. given a function `func` generic over some type
+      `T`, it checks to see: 
+        1) what types the function is called on; say
+      `float64` and `char`
+        2) creates copies of `func` (e.g. `func_f64` and `func_char`) for each datatype. 
+    As such, the cost is absorbed into the compile-time process and there is no runtime penalty. 
+- the behavior can be further constrained by **traits**, i.e. types that implement a certain functionality.
+- traits can have default implementations, which can then be over-ridden for each specific struct that trait is defined for.
+    - refer to `main.rs` in `generics_traits_lifetimes` for an example; the
+      `Summary` trait is instantiated with a default implementation, which is
+      then augmented by `impl Summary for <struct_name>` to tailor the default
+      to the requirements of each struct. 
+- interestingly, traits can have multiple sub-methods; this makes them more
+  similar to interfaces than properties of an object. 
+- can additionally use **trait bounds** to constrain the types accepted by a
+  function to include only those types that accept a certain trait. example:
 ```
 fn main<T: Summary> (item:&T) {
     //snip
@@ -254,12 +273,22 @@ fn some_function<T, U>(t: &T, u: &U) -> i32
     where T: Display + Clone,
           U: Clone + Debug
 {
+    // snip 
+}
 
 ```
-- trait bounds also allow us to perform blanket implementations, i.e. implement traits for structs that already implement a certain trait. for example,
-rust standard library uses trait bounds to implement a `to_string` method for all types that implement the `Display` trait. 
+- trait bounds also allow us to perform blanket implementations, i.e. implement
+  traits for structs that already implement another trait. for example, the Rust
+  standard library uses trait bounds to implement a `to_string` method for all
+  types that implement the `Display` trait (code snippet below)
+```
+impl<T:Display> ToString for T {
+    fn to_string(&self) {
+        //--snip--
+    }
+}
+```
 - you can also use trait bounds to conditionally implement methods for types that implement certain traits. Example:
-
 ```
 use std::fmt::Display;
 
@@ -284,6 +313,25 @@ impl<T: Display + PartialOrd> Pair<T> {
     }
 }
 ```
-- in this case, the `cmp_display` method is implemented only for `Pair` structs containing types `T` that implement the `Display` and `PartialOrd` traits. 
+- in this case, the `cmp_display` method is implemented only for `Pair` structs
+  containing types `T` that implement the `Display` and `PartialOrd` traits.
+- We can also define functions that return a type that implements a specific trait, for example something like:
+```
+fn returns_summarizable() -> impl Summary {
+    Tweet { //tweet parameters }
+}
+```
+- in this case, the function `returns_summarizable` returns a `Tweet` object,
+  which we know implements the `Summary` trait. 
+- **One caveat**: functions like this can only return a single `type`. There
+  are workarounds which we will get to later. 
 
-### 10.3: Lifetimes 
+### 10.3: Lifetimes
+- the main purpose of **lifetimes** is to avoid dangling references, i.e. references that persist
+after the variables they reference have gone out of scope.
+- In some instances, lifetimes must be explicitly annotated - these instances are those where the compiler
+cannot infer what the lifetime of a variable actually is. Example:
+``` 
+
+
+```
