@@ -26,8 +26,11 @@ impl Config {
 // Box <dyn Error>, indicates to the compiler that the return type implements the Error trait without
 // having to specify what the exact error type is. 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>>{
-    let contents =
-        fs::read_to_string(config.filepath)?;
+    let contents = fs::read_to_string(config.filepath)?;
+    for line in search(&config.query, &contents) {
+        println!("{}", line)
+    }
+
     Ok(())
 }
 
@@ -40,7 +43,7 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
             results.push(line)
         }
     }
-    return vec![]
+    return results 
 }
 
 // adding in some tests
