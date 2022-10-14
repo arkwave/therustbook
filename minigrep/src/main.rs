@@ -1,6 +1,10 @@
 use std::env;
-use std::fs;
+use minigrep::Config;
 use std::process;
+
+// general idea: want to create a command line program that runs grep with the following syntax:
+// cargo run <searchstring> <filepath> 
+// that searches the file located at <filepath> for the occurrence of <searchstring> 
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -9,30 +13,8 @@ fn main() {
         process::exit(1)
     });
 
-    println!("Searching for {} in {}", config.query, config.filepath);
-
-    run(config);
-}
-
-fn run(config: Config) {
-    let contents =
-        fs::read_to_string(config.filepath).expect("Something went wrong when reading the file!");
-    println!("Found contents:\n{}", contents)
-}
-
-struct Config {
-    query: String,
-    filepath: String,
-}
-
-impl Config {
-    fn new(args: &Vec<String>) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("Not enough arguments!");
-        }
-        let query = args[1].clone();
-        let filepath = args[2].clone();
-
-        Ok(Config { query, filepath })
+    if let Err(e) = minigrep::run(config) {
+        println!("Application Error: {}", e);
+        process::exit(1)
     }
 }
