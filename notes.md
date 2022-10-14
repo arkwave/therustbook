@@ -327,11 +327,109 @@ fn returns_summarizable() -> impl Summary {
   are workarounds which we will get to later. 
 
 ### 10.3: Lifetimes
+
+#### Introduction & usage in function definitions
 - the main purpose of **lifetimes** is to avoid dangling references, i.e. references that persist
 after the variables they reference have gone out of scope.
 - In some instances, lifetimes must be explicitly annotated - these instances are those where the compiler
-cannot infer what the lifetime of a variable actually is. Example:
+cannot infer what the lifetime of a variable actually is. Example: consider a
+case where we have two strings, `A` and `B`, and the following function: 
 ``` 
-
+fn longest(a: &str, b: &str) -> &str {
+    if a.len() > b.len() {
+        return a
+    } else {
+        return b
+    }
+}
+```
+- trying to compile this code will throw an exception about lifetimes - tl;dr is that Rust has no idea
+if the references it is supposed to "return" according to the function definition are valid anymore, because
+it has no way to implicitly perform a lifetime assessment by looking at the scope of the variables.
+- the solution here is to explicitly annotate the lifetimes as follows:
+```
+fn longest<'x>(a: &'x str, b:&'x str) -> &'x str {
+    // --snip--
+}
+```
+- here, the `'x` syntax tells the compiler "hey, each of these variables has a lifetime parametrized by `'x`"
+- More examples of lifetime syntax:
+    1. `&i32` - reference to an `i32`.
+    2. `&'a i32` - reference to an `i32` with an explicit lifetime of `'a` 
+    3. `&'a mut i32` - a mutable reference to an `i32` with an explicit lifetime of `'a`. 
+- important thing to remember is that lifetimes describe the relationship between the lifetimes of multiple 
+references to each other; for example,
+``` 
+fn longest<'a>(x: &'a str, y: str) -> &'a str {
+    x
+}
+```
+would compile just fine. The fact that no lifetime is specified on `y` indicates that the lifetimes
+of `x` and `y` are not related at all, and the return value has a lifetime annotation of `'a` as well, so all is good.
+However, the following
 
 ```
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    let result = String::from("really_long_string");
+    return result.as_str()
+}
+```
+would fail to compile since the lifetime of `result` has no relationship whatsoever to 
+the lifetime `'a` of `x` or `y`. Additionally, `result` goes out of scope at the end of 
+the function, so the reference returned by `result.as_str()` is dangling. 
+
+#### Usage in Enums and Structs
+Key ideas here are as follows:
+
+1. `impl` for structs containing lifetime annotations will also need lifetime annotations, since the compiler has to know
+that the impl method is bound to the lifetime of the struct. Refer to `lifetimes.rs` for examples. 
+2. **Lifetime Elision Rules**: these are a sequence of rules the compiler implements to decide if explicit lifetime annotation is required. 
+3. the `static` lifetime - this lifetime is for variables that are valid for the entire lifetime of the program - kinda like constants in Python imported from some `constants.py` file. 
+
+
+#### Tying it all together:
+So how would we re-write a function returning a reference to the longest of two strings? The non-working implementation is reproduced below:
+
+``` 
+fn longest(a: &str, b: &str) -> &str {
+    if a.len() > b.len() {
+        return a
+    } else {
+        return b
+    }
+}
+```
+
+and here is a working example that brings together the concepts of trait bounds, lifetimes and generic type parameters:
+
+```
+use std::fmt::Display;
+
+fn longest_with_an_annoucement<'a, T>(
+    x: &'a str,
+    y: &'a str:
+    ann: T
+) -> &'a str
+where T: Display 
+{
+    println!("Attention, an announcement: {}", ann);
+    if x.len() > y.len() {
+        x
+    } else {
+        y
+    }   
+}
+```
+Since we're guaranteed that the generic T implements the Display trait by the
+trait bound `T: Display`, we know that the call to the `println` macro will not
+fail. Additionally, we know that all the references being handled by the
+function have an explicit lifetime of `'a`, and so we can freely return the
+references required provided the function is called with both references still
+in scope. 
+
+
+
+
+
+
+
