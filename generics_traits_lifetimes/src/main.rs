@@ -43,3 +43,17 @@ fn main() {
     };
     println!("1 new tweet: {}", tweet.summarize());
 }
+
+
+// example of a function def that returns a Type that implements summary.
+// Note that with this defintion, we cannot potentially return two or more different types that
+// both implement Summary, e.g. we cannot conditionally return either a Tweet or a NewsLetter
+// based on some flag
+fn returns_summarizable() -> impl Summary {
+    return Tweet {
+        username: String::from("user"),
+        content: String::from("Another Banger."),
+        retweet: false,
+        reply: false
+    }
+}
