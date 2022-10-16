@@ -1,8 +1,8 @@
 use std::error::Error; 
 use std::fs;
-use std::env; 
+// use std::env; 
 
-// Represent the valid states of the program as a struct; in this case, we need a query and a filepath. 
+// Represent the valid states of the program as a struct; in this case, we need a query, filepath and ignore_case. 
 // Important: setting the struct to pub doesn't turn the individual fields public as well. This needs
 // to be done individually. 
 pub struct Config {
@@ -19,8 +19,13 @@ impl Config {
         }
         let query = args[1].clone();
         let filepath = args[2].clone();
-        let ignore_case = env::var("IGNORE_CASE").is_ok(); 
-        println!("Ignoring case: {}", ignore_case);
+        let case_str = String::from("-c");
+        let ignore_case = if args.contains(&case_str) {
+            true
+        } else {
+            false
+        };
+        eprintln!("Ignoring case: {}", ignore_case);
 
         Ok(Config { query, filepath, ignore_case })
     }
@@ -46,7 +51,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>>{
 }
 
 // in this case, we need the explicit lifetime annotation on contents because
-// the lifetime of the return value depends on the lifetime of the reference in contents. 
+// the lifetime of the return value depends on the lifetime of the reference in contents.
+// for the same reason, we don't need a lifetime annotation on query. 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     let mut results = Vec::new(); 
     for line in contents.lines() {

@@ -428,8 +428,62 @@ references required provided the function is called with both references still
 in scope. 
 
 
+### 13.1: Closures
+- closures are anonymous functions that 
+1) can be assigned to variables and called regularly as functions
+2) can capture the state of their their current execution environment; refer to the T-Shirt giveaway example. 
+
+- example: `unwrap_or_else` as implemented for `Option` has the following definition:
+```
+impl<T> Option<T> {
+    pub fn unwrap_or_else<F>(self, f:F) -> T 
+    where F: FnOnce() -> T 
+    {
+        match self {
+            Some(x) => x,
+            None => f()
+        }
+    }
+}
+```
+It accepts one argument: a closure that itself takes no arguments. It returns a type T, which is the type stored inside the `Some` variant of an `Option`. If `Option<T>` is `Some`, it returns `T`. Else, it returns `None`.  
+
+- `FnOnce` is one of three **closure traints** that closures can implement, definitions below (lifted from The Book): 
+1. `FnOnce` applies to closures that can be called at least once. All closures
+   implement this trait, because all closures can be called. If a closure moves
+   captured values out of its body, then that closure only implements FnOnce
+   and not any of the other Fn traits, because it can only be called once.
+2. `FnMut` applies to closures that don’t move captured values out of their
+   body, but that might mutate the captured values. These closures can be
+   called more than once.
+3. `Fn` applies to closures that don’t move captured values out of their body
+   and that don’t mutate captured values. These closures can be called more
+   than once without mutating their environment, which is important in cases
+   such as calling a closure multiple times concurrently. Closures that don’t
+   capture anything from their environment implement `Fn`.
+
+So in context: `unwrap_or_else` implements the `FnOnce()` closure trait with signature `()-> T`; this implies that the following must hold:
+1. The closure can be called exactly once. 
+2. The closure accepts no arguments. 
+3. The closure must return the type `T` contained within the `Some` variant of the `Option` enum.
+
+Refer to the Rust Book for an example where using the wrong kind of closure prevents code from compiling. TL;DR there has
+to be a correspondence between what traits the closure implements and what the closure actually does; you can't use a closure
+implementing `FnOnce` on multiple objects, and you can't use a closure implementing `FnMut` to move captured values out of 
+the closure's environment.
 
 
+### 13.2: Iterators 
+- much like python - iterators in Rust are lazy, created with `.iter()` and implement a `next()` method that consumes them.
+- **consuming adaptors**: methods that consume an iterator, i.e. the iterator cannot be used after the method is called. e.g. `sum`.  
+- **iterating adaptors**: methods that produce new iterators, i.e. applying a closure to the result of an iterator. 
+- Key fact: in Rust, iterators do not produce anything unless consumed, so we can use the `collect()` method to evaluate the iterator.example:
+``` 
+let v1: Vec<i32> = vec![1, 2, 3];
+let v2: Vec<i32> = v1.iter().map(|x| x + 1).collect();
+assert_eq!(v2, vec![2, 3, 4]);
+```
 
+- `iter()` does not take control over the iterable it is called on, but `into_iter()` does. 
 
 
