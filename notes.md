@@ -446,9 +446,11 @@ impl<T> Option<T> {
     }
 }
 ```
-It accepts one argument: a closure that itself takes no arguments. It returns a type T, which is the type stored inside the `Some` variant of an `Option`. If `Option<T>` is `Some`, it returns `T`. Else, it returns `None`.  
+It accepts one argument: a closure that itself takes no arguments. It returns a
+type T, which is the type stored inside the `Some` variant of an `Option`. If
+`Option<T>` is `Some`, it returns `T`. Else, it returns `None`.  
 
-- `FnOnce` is one of three **closure traints** that closures can implement, definitions below (lifted from The Book): 
+- `FnOnce` is one of three **closure traits** that closures can implement, definitions below (lifted from The Book): 
 1. `FnOnce` applies to closures that can be called at least once. All closures
    implement this trait, because all closures can be called. If a closure moves
    captured values out of its body, then that closure only implements FnOnce
@@ -475,8 +477,8 @@ the closure's environment.
 
 ### 13.2: Iterators 
 - much like python - iterators in Rust are lazy, created with `.iter()` and implement a `next()` method that consumes them.
-- **consuming adaptors**: methods that consume an iterator, i.e. the iterator cannot be used after the method is called. e.g. `sum`.  
-- **iterating adaptors**: methods that produce new iterators, i.e. applying a closure to the result of an iterator. 
+- **consuming adaptors**: methods that consume an iterator, i.e. the iterator cannot be used after the method is called. e.g. `sum()`.  
+- **iterator adaptors**: methods that produce new iterators, i.e. applying a closure to the result of an iterator, e.g. `map()` 
 - Key fact: in Rust, iterators do not produce anything unless consumed, so we can use the `collect()` method to evaluate the iterator.example:
 ``` 
 let v1: Vec<i32> = vec![1, 2, 3];
@@ -485,5 +487,38 @@ assert_eq!(v2, vec![2, 3, 4]);
 ```
 
 - `iter()` does not take control over the iterable it is called on, but `into_iter()` does. 
+
+#### Using iterators and closures together
+- can apply closures to iterators to elegantly and readably perform a sequence of operations. For example:
+``` 
+let v1: Vec<i32> = vec![1, 2, 3];
+let v2: Vec<i32> = v1.iter().map(|x| x + 1).collect();
+
+struct Shoe {
+    size: u32,
+    stype: String 
+}
+
+fn get_shoes_of_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
+    shoes.into_iter().filter(|s| s.size == shoe_size).collect()
+}
+```
+
+### 14: More about Cargo and Crates 
+
+
+### 15: Smart Pointers
+- **smart** pointers are pointers with additional metadata or guarantees.
+    - example: `String` is a smart pointer, with the guarantee that its contents will be valid `UTF-8` strings. 
+- Smart pointers are usually implemented as `structs` that implement the `Deref` and `Drop` traits.
+    - `Deref` allows an instance of the smart pointer to work like a reference so that code can either run with a reference or with an instance of the struct.
+    - `Drop` determines what happens when smart pointer instance goes out of scope.
+- the `Box` smart pointer:
+    - used to produce a finite-size stack-allocated pointer that points to data on the heap. 
+    - benefit here is that heap allocated memory doesn't need to be moved around when passing ownership
+
+
+
+
 
 
