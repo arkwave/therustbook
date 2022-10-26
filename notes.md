@@ -517,8 +517,66 @@ fn get_shoes_of_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
     - used to produce a finite-size stack-allocated pointer that points to data on the heap. 
     - benefit here is that heap allocated memory doesn't need to be moved around when passing ownership
 
+#### Traits implemented by smart pointers:
+1.`Deref`: 
+    - this allows values "pointed to" by smart pointers to be referenced
+      directly. Most in-built smart pointers (`Box`, `String`), etc implement
+      this by default. 
+    - Dereferencing is implemented by default on standard smart pointers and
+      all "dumb" pointers; `Deref` only needs to be explicitly implemented if
+      implementing anew storage class, or if we want to override the default
+      behavior of `*` operator.  
+    - Rust performs something called **deref coercion**, where it iteratively
+      applies the deref operator to arguments until the value obtained matches
+      the type desired by the function utilizing the value. For example,
+      consider the following
+
+    ```
+    struct MyBox<T>(T);
+
+    impl<T> MyBox<T> {
+        fn new(x: T) -> MyBox<T> {
+            MyBox(x)
+        }
+    }
+
+    impl<T> Deref for MyBox<T> {
+        type Target = T; 
+
+        fn deref(&self) -> &Self::Target {
+            &self.0 
+        } 
+    }
+
+    fn hello(x: &str) {
+        println!("Hello {x}!"); 
+    }
+
+    fn main() {
+        let m = MyBox::new(String::from("booyah"));
+        hello(&m) // prints out "Hello booyah!"
+
+    }
+    ```
+    The above example only compiles because of deref coercion; we have the
+    following chain of deref calls: `&MyBox<String> -> &String -> &str`. The neat
+    thing is that there is **no runtime penalty** for deref coercion, since the
+    number of deref calls required is identified at compile time. 
+2. `Drop`: 
+    - this trait determines what happens when the variable implementing this trait goes out of scope.
+    - is contained in the prelude, no need to bring it into scope. 
+    - `a.drop()` cannot usually be called explicitly, because variables are
+      cleaned up by default at the end of the scope - this would result in a
+      double-freeing error, where Rust tries to free the same value twice. 
+    - to drop variables explicitly before the end of scope, use the
+      `std::mem::drop` instead; this is also in the prelude, can be called via
+      `drop(a)` rather than `a.drop()`.
+
+### 15.4 - 15.6: Reference Counting pointers, Interior Mutability, and Memory leaks
 
 
 
 
+
+### 16: Fearless Concurrency. 
 
