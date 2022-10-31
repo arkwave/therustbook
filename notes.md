@@ -558,10 +558,11 @@ fn get_shoes_of_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
 
     }
     ```
-    The above example only compiles because of deref coercion; we have the
-    following chain of deref calls: `&MyBox<String> -> &String -> &str`. The neat
-    thing is that there is **no runtime penalty** for deref coercion, since the
-    number of deref calls required is identified at compile time. 
+The above example only compiles because of deref coercion; we have the
+following chain of deref calls: `&MyBox<String> -> &String -> &str`. The neat
+thing is that there is **no runtime penalty** for deref coercion, since the
+number of deref calls required is identified at compile time. 
+
 2. `Drop`: 
     - this trait determines what happens when the variable implementing this trait goes out of scope.
     - is contained in the prelude, no need to bring it into scope. 
@@ -572,11 +573,75 @@ fn get_shoes_of_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
       `std::mem::drop` instead; this is also in the prelude, can be called via
       `drop(a)` rather than `a.drop()`.
 
-### 15.4 - 15.6: Reference Counting pointers, Interior Mutability, and Memory leaks
+### 15.4: Reference Counting pointers
+- reference counting pointers are specified by `Rc<T>`; this is a reference counting pointer that is generic over type T. 
+- want to use these when we're not sure at compile time which part of our
+  program will be the _last_ to use a specific heap-allocated piece of data.
+  Example: assume we have a graph with a nodes and edges; we might want to
+  clean up nodes that no longer have any edges associated with them. 
+- Also implies that reference counting pointers are used to **share** data
+  without being bound by compile-time restrictions re: ownership. Example:
 
+``` 
+enum List {
+    Cons(i32, Box<List>), 
+    Nil 
+}
 
+use crate::List::{Cons, Nil}
 
+let A = Cons(5, Box::new(Cons(10, Nil)))
+let B = Cons(20, Box::new(A));
+let C = Cons(30, Box::new(A));
+```
+This example will throw a compile-time error - since the ConsList data structure owns its data by default, initializing B causes a move of A. Can resolve this with the following:
 
+``` 
+enum List {
+    Cons(i32, Rc<List>), 
+    Nil 
+}
+
+use crate::List::{Cons, Nil}
+use std::rc::Rc;
+
+let A = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+let B = Cons(20, Rc::clone(&A));
+let C = Cons(30, Rc::clone(&A));
+```
+Every element of A is wrapped in an `Rc` so that the call to clone can effectively update the reference counters of each element.
+
+TL;DR: Reference Counting Pointers allow you to use immutable references to share read-only data between different parts of your program. 
+
+### 15.5 - 15.6: Interior Mutability & Memory leaks
+- Interior mutability is a pattern in Rust that lets you mutate data even where
+  there are immutable references to that data - this is usually disallowed, but
+  we can get around the borrow checker by enforcing that memory checks are done
+  at _runtime_ rather than _compile_time_.
+
+- Rationale: compiler is conservative when it comes to ensuring that memory
+  invariants are maintained. Example: you create a struct, and want to mock it
+  out for testing purposes by fiddling with one of the internal values.
+
+- Drawbacks: We don't get good error handling. Since the error is caught/found
+  at runtime, it might break when deployed, and there's no other way to handle
+  that case other than panic. 
+
+- Refer to the book for more in-depth discussion - the example provided there is a little contrived, but does a decent job explaining the concept.
+
+- Can use `RefCell` to implement the interior mutability pattern: 
+1. `RefCell` has two safe methods; `.borrow()` and `borrow_mut()`, which return `Ref<T>` and `RefMut<T>` pointers respectively. Each of these implement `Deref`, so we can treat them as regular pointers. 
+2. `RefCell` then tracks the number of `RefMut` and `Ref` pointers in existence - if memory invariants are violated, it panics the whole program 
+
+- Crucially, we can use `RefCell` and `Rc` to share data across different parts of a program in a read-write manner, with the memory invariants enforced only at runtime.
+
+- Using these together can result in _memory leaks_, i.e. situations where the
+  pointer counts never go to 0 and so the memory can never be cleaned up.
+  Simple example: imagine a ConsList that is self-referential in some way,
+  implemented with `Rc` and `RefCell`. Specifically, `Rc` instances are cleaned
+  up only when the number of *strong references* goes to 0.
+
+- Solution: weak references, i.e. references that can refer to but cannot take ownership of values. 
 
 ### 16: Fearless Concurrency. 
 
